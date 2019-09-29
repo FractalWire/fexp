@@ -13,21 +13,22 @@ id=0
 while true
 do
     # selection=$(test "$show_selection" && echo "$ret")
-    { read query; read id; read key; read ret; } <<< $(
+    { read query; read id; read key; read ret; read code; } <<< $(
         (test $refresh_buffer \
                 && ( (echo -e '.'; fd -t d --color=always) \
                     | tee "$fzf_tmp_buffer" ) \
                 || cat "$fzf_tmp_buffer") \
             | ${fzf_bin} --height 100% --no-clear \
-                --print-sel-idx --scy=$id \
+                --reverse \
+                --print-sel-idx --sel-idx=$id \
                 --print-query --query="$query" \
                 --header="${cur_folder/#$HOME/'~'} $query" \
                 --expect=ctrl-h,ctrl-l,ctrl-alt-m,ctrl-alt-h,ctrl-alt-l \
                 --expect=f1,f2,f3 \
                 --preview-window=right:50% \
-                --preview "tree -L $tree_depth -C {}"
+                --preview "tree -L $tree_depth -C {}"; \
+        echo $?
         )
-    code=$?
     refresh_buffer=
     case $code in
         130)
@@ -83,6 +84,6 @@ do
     esac
 done
 
-echo $output
 rm "$fzf_tmp_buffer"
+echo $output
 exit $code
