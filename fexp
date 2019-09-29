@@ -1,0 +1,77 @@
+#!/bin/bash
+# A simple script to make fzf a fuzzy-file explorer
+# After the program exits, it should be cleared with tput rmcup, otherwise the
+# terminal stays in alternate screen mode
+
+fzf_bin="fzf"
+old_folder=$(pwd)
+cur_folder="$old_folder"
+tree_depth=1
+id=0
+while true
+do
+    { read query; read key; read ret; } <<< $(
+        (echo -e '.'; fd -t d --color=always) \
+            | ${fzf_bin} --height 100% --no-clear \
+                --print-query --query="$query" \
+                --header="${cur_folder/#$HOME/'~'} $query" \
+                --expect=ctrl-h,ctrl-l,ctrl-alt-m,ctrl-alt-h,ctrl-alt-l \
+                --expect=f1,f2,f3 \
+                --preview-window=right:50% \
+                --preview "tree -L $tree_depth -C {}"
+        )
+    code=$?
+    case $code in
+        130)
+            output="$old_folder"
+            break
+            ;;
+        0|1)
+            case $key in
+                ctrl-h)
+                    cd ..
+                    cur_folder=$(pwd)
+                    query=''
+                    ;;
+                ctrl-l)
+                    cd "$ret"
+                    cur_folder=$(pwd)
+                    query=''
+                    ;;
+                alt-enter|ctrl-alt-m)
+                    output="$cur_folder"
+                    break
+                    ;;
+                ctrl-alt-h)
+                    tree_depth=$((tree_depth - 1 > 0 ? tree_depth - 1 : tree_depth))
+                    ;;
+                ctrl-alt-l)
+                    tree_depth=$((tree_depth + 1))
+                    ;;
+                f1)
+                    # some ingame help here
+                    ;;
+                f2)
+                    # custom script to see image in terminal
+                    imgp --no-clear
+                    ;;
+                f3)
+                    # custom script to open file in remote neovim session
+                    nvrp --no-clear
+                    ;;
+                *)
+                    cd "$ret"
+                    output=$(pwd)
+                    break
+                    ;;
+            esac
+            ;;
+        *)
+            output="$old_folder"
+            break;
+            ;;
+    esac
+done
+
+echo $output
+exit $code
