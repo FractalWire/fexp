@@ -3,16 +3,23 @@
 # After the program exits, it should be cleared with tput rmcup, otherwise the
 # terminal stays in alternate screen mode
 
-fzf_bin="fzf"
+fzf_bin="$HOME/src-repos/git-repos/fzf/target/fzf-linux_amd64"
+fzf_tmp_buffer="/tmp/fzf_buffer"
+refresh_buffer=true
 old_folder=$(pwd)
 cur_folder="$old_folder"
 tree_depth=1
 id=0
 while true
 do
-    { read query; read key; read ret; } <<< $(
-        (echo -e '.'; fd -t d --color=always) \
+    # selection=$(test "$show_selection" && echo "$ret")
+    { read query; read id; read key; read ret; } <<< $(
+        (test $refresh_buffer \
+                && ( (echo -e '.'; fd -t d --color=always) \
+                    | tee "$fzf_tmp_buffer" ) \
+                || cat "$fzf_tmp_buffer") \
             | ${fzf_bin} --height 100% --no-clear \
+                --print-sel-idx --scy=$id \
                 --print-query --query="$query" \
                 --header="${cur_folder/#$HOME/'~'} $query" \
                 --expect=ctrl-h,ctrl-l,ctrl-alt-m,ctrl-alt-h,ctrl-alt-l \
@@ -21,6 +28,7 @@ do
                 --preview "tree -L $tree_depth -C {}"
         )
     code=$?
+    refresh_buffer=
     case $code in
         130)
             output="$old_folder"
@@ -32,11 +40,13 @@ do
                     cd ..
                     cur_folder=$(pwd)
                     query=''
+                    refresh_buffer=true
                     ;;
                 ctrl-l)
                     cd "$ret"
                     cur_folder=$(pwd)
                     query=''
+                    refresh_buffer=true
                     ;;
                 alt-enter|ctrl-alt-m)
                     output="$cur_folder"
@@ -74,4 +84,5 @@ do
 done
 
 echo $output
+rm "$fzf_tmp_buffer"
 exit $code
