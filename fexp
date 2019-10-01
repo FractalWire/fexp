@@ -10,20 +10,21 @@ old_folder=$(pwd)
 cur_folder="$old_folder"
 tree_depth=1
 id=0
+fd_ignore=
 while true
 do
     # selection=$(test "$show_selection" && echo "$ret")
     { read query; read id; read key; read ret; read code; } <<< $(
         (test $refresh_buffer \
-                && ( (echo -e '.'; fd -t d --color=always) \
+                && ( (echo -e '.'; fd -t d --color=always $fd_ignore) \
                     | tee "$fzf_tmp_buffer" ) \
                 || cat "$fzf_tmp_buffer") \
             | ${fzf_bin} --height 100% --no-clear \
                 --reverse \
                 --print-sel-idx --sel-idx=$id \
                 --print-query --query="$query" \
-                --header="${cur_folder/#$HOME/'~'} $query" \
-                --expect=ctrl-h,ctrl-l,ctrl-alt-m,ctrl-alt-h,ctrl-alt-l \
+                --header="${cur_folder/#$HOME/'~'}" \
+                --expect=ctrl-h,ctrl-l,ctrl-alt-m,ctrl-alt-h,ctrl-alt-l,alt-h \
                 --expect=f1,f2,f3 \
                 --preview-window=right:50% \
                 --preview "tree -L $tree_depth -C {}"; \
@@ -58,6 +59,10 @@ do
                     ;;
                 ctrl-alt-l)
                     tree_depth=$((tree_depth + 1))
+                    ;;
+                alt-h)
+                    test -z $fd_ignore && fd_ignore="-HI" || fd_ignore=
+                    refresh_buffer=true
                     ;;
                 f1)
                     # some ingame help here
