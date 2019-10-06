@@ -66,6 +66,22 @@ do
                     ;;
                 f1)
                     # some ingame help here
+                    less << EOF
+HELP
+
+    * Shortcut:
+        - ctrl-h/ctrl-l: go up/down the tree using the currently selected
+          folder
+        - ctrl-alt-h/ctrl-alt-l: expand/lower the depth of the tree view
+        - alt-a: show/hide hidden directory
+        - f1: show this help
+        - f2: start your terminal image viewer, imgp
+        - f3: start your text file previewer, nvrp
+
+        - alt-enter/wtrl-alt-m: output current folder and exit
+        - enter: output folder under cursor and exit
+        - escape: exit with no output
+EOF
                     ;;
                 f2)
                     # custom script to see image in terminal
