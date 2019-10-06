@@ -24,7 +24,7 @@ do
                 --print-sel-idx --sel-idx=$id \
                 --print-query --query="$query" \
                 --header="${cur_folder/#$HOME/'~'}" \
-                --expect=ctrl-h,ctrl-l,ctrl-alt-m,ctrl-alt-h,ctrl-alt-l,alt-h \
+                --expect=ctrl-h,ctrl-l,ctrl-alt-m,ctrl-alt-h,ctrl-alt-l,alt-a \
                 --expect=f1,f2,f3 \
                 --preview-window=right:50% \
                 --preview "tree -L $tree_depth -C {}"; \
@@ -60,7 +60,7 @@ do
                 ctrl-alt-l)
                     tree_depth=$((tree_depth + 1))
                     ;;
-                alt-h)
+                alt-a)
                     test -z $fd_ignore && fd_ignore="-HI" || fd_ignore=
                     refresh_buffer=true
                     ;;
