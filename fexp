@@ -3,6 +3,19 @@
 # After the program exits, it should be cleared with tput rmcup, otherwise the
 # terminal stays in alternate screen mode
 
+OPTERR=0
+while getopts ':o:' opt; do
+  case "$opt" in
+    o) output_dest="$OPTARG" ;;
+  esac
+done
+shift $(( OPTIND - 1 ))
+unset opt OPTARG OPTIND
+
+if test -z $output_dest;then
+    output_dest="/dev/stdout"
+fi
+
 fzf_bin="$HOME/src-repos/git-repos/fzf/target/fzf-linux_amd64"
 fzf_tmp_buffer="$(mktemp -p /tmp fzf_buffer.XXXXXX)"
 refresh_buffer=true
