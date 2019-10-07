@@ -11,6 +11,19 @@ cur_folder="$old_folder"
 tree_depth=1
 id=0
 fd_ignore=
+
+tput smcup 1>&2
+# cleanup and output result
+function die() {
+    tput rmcup 1>&2
+    rm $fzf_tmp_buffer
+    echo "$output" > "$output_dest"
+    exit $code
+}
+
+trap die EXIT
+
+
 while true
 do
     # selection=$(test "$show_selection" && echo "$ret")
@@ -105,6 +118,3 @@ EOF
     esac
 done
 
-rm "$fzf_tmp_buffer"
-echo $output
-exit $code
